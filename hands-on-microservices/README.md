@@ -140,3 +140,21 @@ You can browse to PG-Admin at <http://localhost:5050/browser/> and then add conn
 - Password: postgres
 
 And you should be able to connect to tsservice_db database and see the table "Transactions". You should also see the table "_prisma_migrations".
+
+### Seeding test data
+
+Add a `seed.ts` file under the prisma folder with the following content.
+
+Go to `package.json` and add the following after devDependencies:
+
+```json
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  }
+```
+
+Then run this command:
+
+```sh
+npx prisma db seed
+```
