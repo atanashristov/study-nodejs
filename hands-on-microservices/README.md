@@ -62,3 +62,81 @@ npm install
 cd src
 node index.js
 ```
+
+## Chapter 6: Synchronous Microservices - transaction microservice
+
+We implement transaction microservice with NextJS, Docker, Prisma ORM, PostgreSQL.
+
+First we install NextJS globally: `npm i -g @nestjs/cli`.
+
+Then we create NextJS microservice: `nest new transactionservice`
+
+We can run the generated service:
+
+```sh
+cd transactionservice
+npm run start:dev
+```
+
+And now we can browse to it at <http://localhost:3000>.
+
+### Dockerizing your PostgreSQL instance
+
+Crate `docker-compose.yml`. We setup postgresql server and expose on port 5438, and PgAdmin that is exposed on port 5050.
+
+Instead of directly adding credentials/values to the docker-compose file, we can specify it from an `.env` file.
+
+### Prisma ORM
+
+Next we install Prisma ORM: `npm install prisma -D`.
+
+Next we run the Prisma CLI: `npx prisma init`. It creates an additional folder called _./prisma_.
+
+Then we add `DATABASE_URL` to the `.env` file.
+
+The generated file _prisma\schema.prisma_ acts as your database blueprint with three key sections:
+
+- `generator:` This section configures the Prisma Client generator. The Prisma Client, a powerful API, is then generated to help you access your database.
+
+- `datasource:` Here, you define the database connection details. This includes the database provider and the connection string, often leveraging the DATABASE_URL environment variable for convenience.
+
+- `Model:` This is where the heart of your database schema lies. You define the structure of your data by specifying tables and their corresponding fields.
+
+Then we model the data in _./prisma/schema.prisma_. We add `Transaction` model and enum for status.
+
+We start the docker services
+
+Then we run from the command line this command to generate a migration:
+
+```sh
+npx prisma migrate dev --name init
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "tservice_db", schema "public" at "localhost:5438"
+
+Applying migration `20250728010509_init`
+
+The following migration(s) have been created and applied from new schema changes:
+
+prisma\migrations/
+  └─ 20250728010509_init/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+
+✔ Generated Prisma Client (v6.12.0) to .\generated\prisma in 103ms
+```
+
+You can browse to PG-Admin at <http://localhost:5050/browser/> and then add connection to database server
+
+- Connection name: tservice_db
+- Hostname: postgres
+- Port: 5432
+- Maintenance DB: postgres
+- Username: postgres
+- Password: postgres
+
+And you should be able to connect to tsservice_db database and see the table "Transactions". You should also see the table "_prisma_migrations".
