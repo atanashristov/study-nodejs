@@ -158,3 +158,29 @@ Then run this command:
 ```sh
 npx prisma db seed
 ```
+
+### Implementing the transaction service
+
+First, we create our module using the `npx nest generate module prisma` command.
+
+Prisma CLI command should generate a new folder called `prisma` in `src` and a module `src/prisma/prisma.module.ts`.
+
+If you get errors that the command cannot find some nestjs module, most likely you have corrupted lock file.
+
+Run:
+
+```sh
+del package-lock.json
+rmdir node_modules
+npx prisma generate
+npx nest generate module prisma
+```
+
+Then generate a service: `npx nest generate service prisma`.
+
+### Install Swagger
+
+Next install Swagger: `npm install --save @nestjs/swagger swagger-ui-express`,
+then add it to `src/main.ts`.
+
+You can start the app with `npm run start:dev` and examine: <http://localhost:3000/api>

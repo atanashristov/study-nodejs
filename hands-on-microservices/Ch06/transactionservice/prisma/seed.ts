@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 
 // initialize Prisma Client
 const prismaClient = new PrismaClient();
