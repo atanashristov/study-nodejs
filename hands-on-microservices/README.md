@@ -184,3 +184,122 @@ Next install Swagger: `npm install --save @nestjs/swagger swagger-ui-express`,
 then add it to `src/main.ts`.
 
 You can start the app with `npm run start:dev` and examine: <http://localhost:3000/api>
+
+### Working on transaction implementation
+
+Generate resource for transaction with `npx nest generate resource transaction`.
+
+Specify REST API for transport protocol.
+
+Select Y for CRUD generation.
+
+```sh
+ transactionservice  npx nest generate resource transaction
+✔ What transport layer do you use? REST API
+✔ Would you like to generate CRUD entry points? Yes
+CREATE src/transaction/transaction.controller.ts (1064 bytes)
+CREATE src/transaction/transaction.controller.spec.ts (646 bytes)
+CREATE src/transaction/transaction.module.ts (299 bytes)
+CREATE src/transaction/transaction.service.ts (731 bytes)
+CREATE src/transaction/transaction.service.spec.ts (513 bytes)
+CREATE src/transaction/dto/create-transaction.dto.ts (38 bytes)
+CREATE src/transaction/dto/update-transaction.dto.ts (196 bytes)
+CREATE src/transaction/entities/transaction.entity.ts (29 bytes)
+UPDATE src/app.module.ts (415 bytes)
+```
+
+We only implement:
+
+```sh
+Get all transactions (GET /transaction)
+Get transaction by ID (GET /transaction/{id} )
+Create transaction (POST /transaction)
+```
+
+So, we remove the following files:
+
+```sh
+transaction/transaction.controller.spec.ts
+transaction/dto/update-transaction.dto.ts
+transaction/transaction.service.spec.ts
+```
+
+We remove the following code blocks:
+
+```sh
+remove and update functions from transaction.service.ts
+remove and update functions from transaction.controller.ts
+```
+
+We also remove the following files too:
+
+```sh
+app.controller.ts
+app.module.ts
+app.service.ts
+```
+
+We update `main.ts` to work with `TransactionModule`, not `AppModule`.
+
+We integrate the `PrismaClient` class in `transaction.module.ts`, which will help us communicate with the DB.
+
+We import and inject `PrismaService` in `transaction.service.ts`.
+
+Then we change `findAll` method:
+
+```ts
+  findAll() {
+    return this.prisma.transaction.findMany();
+  }
+```
+
+You can now execute `GET /transaction` from the Swagger page and it should return the seed transaction.
+
+Similarly we implement the `findOne`...
+
+Next we work on `CreateTransactionDto` so that we can finish the POST create method.
+
+We install `class-validator`:
+
+```sh
+npm install class-validator
+npm run start:dev
+```
+
+and modify `create-transaction.dto.ts`:
+
+```ts
+import { IsString, IsOptional, IsEnum, IsNotEmpty, IsUUID }
+  from 'class-validator';
+
+enum Status {
+  CREATED = 'CREATED',
+  SETTLED = 'SETTLED',
+  FAILED = 'FAILED',
+}
+
+export class CreateTransactionDto {
+  @IsNotEmpty()
+  @IsEnum(Status)
+  status: Status;
+
+  @IsUUID()
+  @IsNotEmpty()
+  accountID: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+```
+
+We can now run `POST /transaction` from Swagger UI, sending a create transaction JSON payload:
+
+```json
+{
+  "status": "CREATED",
+  "accountId": "662c081370bd2ba6b5f04e94",
+  "description": "Optional transaction description"
+}
+```

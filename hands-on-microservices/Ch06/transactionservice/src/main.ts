@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { TransactionModule } from './transaction/transaction.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 // bootstrap function
 async function bootstrap() {
   // Create a NestJS application instance
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(TransactionModule);
 
   // new Swagger document configuration
   const config = new DocumentBuilder()
