@@ -269,26 +269,19 @@ npm run start:dev
 and modify `create-transaction.dto.ts`:
 
 ```ts
-import { IsString, IsOptional, IsEnum, IsNotEmpty, IsUUID }
+import { IsString, IsOptional, IsNotEmpty, IsUUID }
   from 'class-validator';
-
-enum Status {
-  CREATED = 'CREATED',
-  SETTLED = 'SETTLED',
-  FAILED = 'FAILED',
-}
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTransactionDto {
-  @IsNotEmpty()
-  @IsEnum(Status)
-  status: Status;
-
   @IsUUID()
   @IsNotEmpty()
-  accountID: string;
+  @ApiProperty()
+  accountId: string;
 
   @IsOptional()
   @IsString()
+  @ApiProperty()
   description?: string;
 }
 
@@ -298,8 +291,43 @@ We can now run `POST /transaction` from Swagger UI, sending a create transaction
 
 ```json
 {
-  "status": "CREATED",
   "accountId": "662c081370bd2ba6b5f04e94",
   "description": "Optional transaction description"
 }
+```
+
+### Establishing synchronous communication with the account microservice
+
+The transaction service allows us to specify an accountId value and status from the payload. We make the following changes:
+
+- Verify if the provided `accountId` exists and is in a valid state (new or active)
+- If accountId is valid, then create a transaction with the Created status
+- If accountId is invalid, then create a transaction with the Failed status
+
+We install Axios to communicate with the Account MS:
+
+```sh
+npm i --save @nestjs/axios axios
+```
+
+We create `./dto/account.dto` that returns account information.
+
+Then we modify `transaction.module.ts` to call the Account MS.
+
+We configure cross-origin resource sharing (CORS) in the **account service**.
+
+Navigate to `src` folder and install the `cors` package:
+
+```sh
+npm install cors
+```
+
+Then we edit `app.js` and add the following code after the app object is created:
+
+```js
+const corsOptions = {
+    origin: 'http://localhost:3001', //(https://your-client-app.com)
+    optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 ```

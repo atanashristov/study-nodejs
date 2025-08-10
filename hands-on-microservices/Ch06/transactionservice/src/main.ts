@@ -7,6 +7,8 @@ async function bootstrap() {
   // Create a NestJS application instance
   const app = await NestFactory.create(TransactionModule);
 
+  app.setGlobalPrefix('v1');
+
   // new Swagger document configuration
   const config = new DocumentBuilder()
     .setTitle('Transaction API') // title of the API
